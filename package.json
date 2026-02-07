@@ -1,0 +1,31 @@
+{
+  "name": "saas-core",
+  "version": "1.0.0",
+  "description": "Production-ready SaaS core backend built with Node.js, TypeScript and Docker. Focusing on auth, multi-tenancy and scalable architecture.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndriyAtWork25/SaaS-Core.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AndriyAtWork25/SaaS-Core/issues"
+  },
+  "homepage": "https://github.com/AndriyAtWork25/SaaS-Core#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.2.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
