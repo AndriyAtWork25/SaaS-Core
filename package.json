@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/AndriyAtWork25/SaaS-Core#readme",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
@@ -27,6 +28,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.1",
     "ts-node-dev": "^2.0.0",

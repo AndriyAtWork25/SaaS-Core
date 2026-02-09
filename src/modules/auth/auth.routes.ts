@@ -1,27 +1,24 @@
 // auth.routes.ts
-import { Router } from "express";
-import { authrateLimiter } from "../../shared/middleware/security"; 
-import { validate } from "../../shared/middleware/validate";
-import { loginSchema, registerSchema } from "./auth.schemas";
+import { Router } from "express"; // Router für /auth/*
+import { authrateLimiter } from "../../shared/middleware/security"; // richtiger Name
+import { validate } from "../../shared/middleware/validate"; // Zod-Validation Middleware
+import { loginSchema, registerSchema } from "./auth.schemas"; // Zod Schemas
+import { registerController } from "./auth.controller"; // Register Controller
 
 export const authRouter = Router();
 
-authRouter.use(authrateLimiter); // Apply rate limiter to all auth routes
+authRouter.use(authrateLimiter); 
+
 
 authRouter.post(
   "/register",
-  validate({ body: registerSchema }),
-  
-
-  (_req, res) => {
-    res.status(501).json({ message: "Register not implemented" });
-  }
+  validate({ body: registerSchema }), 
+  registerController 
 );
 
 authRouter.post(
   "/login",
   validate({ body: loginSchema }),
-
   (_req, res) => {
     res.status(501).json({ message: "Login not implemented" });
   }
