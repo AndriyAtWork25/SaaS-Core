@@ -3,9 +3,13 @@ import express from 'express';
 import { env } from "./shared/config/env";
 import { errorHandler } from "./shared/middleware/errorHandler";
 import { authRouter } from "./modules/auth/auth.routes";
+import { helmetMiddleware, apiRateLimiter } from "./shared/middleware/security";
 
 
 export const app = express();
+
+app.use(helmetMiddleware);
+app.use(apiRateLimiter);
 
 app.use(express.json());
 
