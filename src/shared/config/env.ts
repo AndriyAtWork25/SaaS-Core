@@ -1,5 +1,6 @@
 // env.ts
 import "dotenv/config";
+import { access } from "node:fs";
 
 function requireEnv(key: string): string {
     const value = process.env[key];
@@ -11,11 +12,8 @@ export const env = {
     nodeEnv: process.env.NODE_ENV ?? "development",
     port: Number(process.env.PORT ?? 3000),
     
-  // später aktivieren, wenn wir DB anschließen:
-  // mongoUri: requireEnv("MONGO_URI"),
+  accessTokenSecret: requireEnv("ACCESS_TOKEN_SECRET"),
 
-  // später für JWT:
-  // accessTokenSecret: requireEnv("ACCESS_TOKEN_SECRET"),
-  // refreshTokenSecret: requireEnv("REFRESH_TOKEN_SECRET"),
+  refreshTokenSecret: requireEnv("REFRESH_TOKEN_SECRET"),
 
 } as const;

@@ -11,7 +11,7 @@ export const apiRateLimiter = rateLimit({
     legacyHeaders: false, 
 });
 
-export const authrateLimiter = rateLimit({
+export const authRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
     limit: 30,
     standardHeaders: "draft-7",

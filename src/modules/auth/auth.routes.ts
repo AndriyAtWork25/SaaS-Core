@@ -1,32 +1,19 @@
 // auth.routes.ts
 import { Router } from "express"; // Router für /auth/*
-import { authrateLimiter } from "../../shared/middleware/security"; // richtiger Name
-import { validate } from "../../shared/middleware/validate"; // Zod-Validation Middleware
-import { loginSchema, registerSchema } from "./auth.schemas"; // Zod Schemas
-import { registerController } from "./auth.controller"; // Register Controller
+import { authRateLimiter } from "../../shared/middleware/security"; // ✅ richtiger Name
+import { validate } from "../../shared/middleware/validate"; // Validiert Requests via Zod
+import { loginSchema, refreshSchema, registerSchema } from "./auth.schemas"; // Schemas
+import { loginController, refreshController, registerController } from "./auth.controller"; // ✅ alle Controller
 
 export const authRouter = Router();
 
-authRouter.use(authrateLimiter); 
+authRouter.use(authRateLimiter); // ✅ Rate limit auf alle /auth routes
 
+authRouter.post("/register", validate({ body: registerSchema }), registerController);
 
-authRouter.post(
-  "/register",
-  validate({ body: registerSchema }), 
-  registerController 
-);
+authRouter.post("/login", validate({ body: loginSchema }), loginController);
 
-authRouter.post(
-  "/login",
-  validate({ body: loginSchema }),
-  (_req, res) => {
-    res.status(501).json({ message: "Login not implemented" });
-  }
-);
-
-authRouter.post("/refresh", (_req, res) => {
-  res.status(501).json({ message: "Refresh not implemented" });
-});
+authRouter.post("/refresh", validate({ body: refreshSchema }), refreshController);
 
 authRouter.post("/logout", (_req, res) => {
   res.status(501).json({ message: "Logout not implemented" });
