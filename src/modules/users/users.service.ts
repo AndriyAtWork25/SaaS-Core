@@ -12,6 +12,8 @@ export type User = {
 
 const userByemail = new Map<string, User>();
 
+const userByid = new Map<string, User>();
+
 export async function createUser(input: {
     email: string;
     password: string;
@@ -28,8 +30,13 @@ export async function createUser(input: {
     };
 
     userByemail.set(user.email, user);
+    userByid.set(user.id, user);
 
     return user;
+}
+
+export function getUserById(id: string): User | undefined {
+    return userByid.get(id);
 }
 
 export function getuserByEmail(email: string): User | undefined {

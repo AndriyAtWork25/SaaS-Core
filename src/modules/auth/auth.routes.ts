@@ -4,10 +4,15 @@ import { authRateLimiter } from "../../shared/middleware/security"; // ✅ richt
 import { validate } from "../../shared/middleware/validate"; // Validiert Requests via Zod
 import { loginSchema, refreshSchema, registerSchema } from "./auth.schemas"; // Schemas
 import { loginController, refreshController, registerController } from "./auth.controller"; // ✅ alle Controller
+import { requireAuth } from "../../shared/middleware/requireAuth";
+import { meController } from "./auth.controller";
+
 
 export const authRouter = Router();
 
 authRouter.use(authRateLimiter); // ✅ Rate limit auf alle /auth routes
+
+authRouter.get("/me", requireAuth, meController);
 
 authRouter.post("/register", validate({ body: registerSchema }), registerController);
 
