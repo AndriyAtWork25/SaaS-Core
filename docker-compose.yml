@@ -1,0 +1,19 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: saas-core-mongodb
+    restart: unless-stopped
+
+    ports:
+      - "27017:27017" 
+
+    environment:
+      MONGO_INITDB_DATABASE: saas_core 
+
+    volumes:
+      - mongo_data:/data/db 
+
+volumes:
+  mongo_data:
+
+

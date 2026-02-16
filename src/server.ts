@@ -1,8 +1,18 @@
 // server.ts
-import { app } from './app';
+import { app } from "./app"; 
+import { env } from "./shared/config/env"; 
+import { connectDb } from "./shared/config/db"; 
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+async function bootstrap() {
+  await connectDb();
 
-app.listen(PORT, () => {
-    console.log(`API running on http://localhost:${PORT}`);
+  app.listen(env.port, () => {
+    console.log(`API running on http://localhost:${env.port}`);
+  });
+}
+
+
+bootstrap().catch((err) => {
+  console.error("Failed to start server:", err);
+  process.exit(1);
 });
