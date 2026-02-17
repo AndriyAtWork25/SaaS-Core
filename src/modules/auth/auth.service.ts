@@ -1,35 +1,27 @@
 // auth.service.ts
-import { AppError } from "../../shared/errors/AppError"; // 4xx Errors
-import { createOrganization } from "../orgs/orgs.service"; // Org erstellen
-import { createUser, getuserByEmail, verifyPassword } from "../users/users.service"; // User ops
+import { AppError } from "../../shared/errors/AppError"; // 4xx errors
+import { createOrganization } from "../orgs/orgs.service"; // org create (DB)
+import { createUser, getUserByEmail, getUserById, verifyPassword } from "../users/users.service"; // user ops (DB)
 import {
   issueAccessToken,
   issueRefreshToken,
   verifyRefreshToken,
   isRefreshTokenActive,
   revokeRefreshToken,
-} from "./token.service"; // Token ops
+} from "./token.service"; // token ops (DB)
 
-export async function registerService(input: {
-  email: string;
-  password: string;
-  orgName: string;
-}) {
+export async function registerService(input: { email: string; password: string; orgName: string }) {
   const organization = await createOrganization(input.orgName);
-  // Erst Org (Tenant) erstellen
 
   const user = await createUser({
     email: input.email,
     password: input.password,
     orgId: organization.id,
   });
-  // Dann User erstellen + password hashing passiert im users.service
 
   const accessToken = issueAccessToken({ sub: user.id, orgId: user.orgId, role: user.role });
-  // Kurzlebiger Access Token
 
-  const { refreshToken } = issueRefreshToken(user.id);
-  // Langlebiger Refresh Token
+  const { refreshToken } = await issueRefreshToken(user.id);
 
   return {
     user: { id: user.id, email: user.email, role: user.role },
@@ -39,36 +31,34 @@ export async function registerService(input: {
 }
 
 export async function loginService(input: { email: string; password: string }) {
-  const user = getuserByEmail(input.email);
-  // User finden (in-memory)
+  const user = await getUserByEmail(input.email);
 
   if (!user) throw new AppError("Invalid credentials", 401);
-  // gleiche Message für Email/Passwort (kein User-Enum)
 
   const ok = await verifyPassword(user, input.password);
   if (!ok) throw new AppError("Invalid credentials", 401);
 
   const accessToken = issueAccessToken({ sub: user.id, orgId: user.orgId, role: user.role });
-  const { refreshToken } = issueRefreshToken(user.id);
+  const { refreshToken } = await issueRefreshToken(user.id);
 
   return { accessToken, refreshToken };
 }
 
 export async function refreshService(input: { refreshToken: string }) {
   const payload = verifyRefreshToken(input.refreshToken);
-  // Signature + expiry check
 
-  if (!isRefreshTokenActive(payload.jti, input.refreshToken)) {
-    throw new AppError("Refresh token revoked", 401);
-  }
+  const active = await isRefreshTokenActive(payload.jti, input.refreshToken);
+  if (!active) throw new AppError("Refresh token revoked", 401);
 
-  // Rotation: alten Refresh Token killen
-  revokeRefreshToken(payload.jti);
+  // Rotation: alten Token löschen
+  await revokeRefreshToken(payload.jti);
 
-  // Ohne DB kennen wir orgId/role nicht zuverlässig beim Refresh.
-  // Das fixen wir, sobald MongoDB drin ist.
-  const accessToken = issueAccessToken({ sub: payload.sub, orgId: "unknown", role: "unknown" });
+  // Jetzt können wir orgId/role korrekt aus DB laden
+  const user = await getUserById(payload.sub);
+  if (!user) throw new AppError("User not found", 401);
 
-  const { refreshToken } = issueRefreshToken(payload.sub);
+  const accessToken = issueAccessToken({ sub: user.id, orgId: user.orgId, role: user.role });
+  const { refreshToken } = await issueRefreshToken(user.id);
+
   return { accessToken, refreshToken };
 }

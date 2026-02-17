@@ -1,7 +1,8 @@
 // auth.controller.ts
+// auth.controller.ts
 import type { Request, Response } from "express";
 import { loginService, refreshService, registerService } from "./auth.service";
-import { getUserById } from "../users/users.service"; // ✅ für /auth/me
+import { getUserById } from "../users/users.service"; // /auth/me lädt User aus DB
 
 export async function registerController(req: Request, res: Response) {
   const { email, password, orgName } = req.body;
@@ -29,17 +30,17 @@ export async function meController(req: Request, res: Response) {
   // requireAuth middleware setzt req.user
   const authUser = req.user;
 
-  // falls jemand die Middleware vergisst oder Token fehlt
+  // falls Token fehlt oder requireAuth nicht genutzt wurde
   if (!authUser) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // user aus in-memory store holen
-  const user = getUserById(authUser.id);
+  // ✅ DB lookup ist async -> await
+  const user = await getUserById(authUser.id);
 
-  // kann passieren wenn Server neu gestartet wurde (in-memory gelöscht)
+  // user existiert nicht (z.B. gelöscht / falscher Token / DB inkonsistent)
   if (!user) {
-    return res.status(401).json({ message: "User not found (server restarted?)" });
+    return res.status(401).json({ message: "User not found" });
   }
 
   return res.status(200).json({
@@ -49,4 +50,5 @@ export async function meController(req: Request, res: Response) {
     role: user.role,
   });
 }
+
 

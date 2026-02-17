@@ -1,48 +1,66 @@
 // users.service.ts
-import bcrypt from "bcrypt";
-import crypto from "node:crypto";
+import bcrypt from "bcrypt"; // hashing + compare
+import { UserModel } from "./models/user.model"; // Zugriff auf User Collection
 
 export type User = {
-    id: string;
-    email: string;
-    passwordHash: string;
-    orgId: string;
-    role: "owner";
+  id: string;
+  email: string;
+  passwordHash: string;
+  orgId: string;
+  role: "owner" | "admin" | "member" | "viewer";
 };
 
-const userByemail = new Map<string, User>();
-
-const userByid = new Map<string, User>();
-
 export async function createUser(input: {
-    email: string;
-    password: string;
-    orgId: string;
+  email: string;
+  password: string;
+  orgId: string; // kommt als string rein
 }): Promise<User> {
-    const passwordHash = await bcrypt.hash(input.password, 12);
+  const passwordHash = await bcrypt.hash(input.password, 12);
+  // Hashing im Service (Business Layer), nicht im Controller
 
-    const user: User = {
-        id: crypto.randomUUID(),
-        email: input.email.toLowerCase(),
-        passwordHash,
-        orgId: input.orgId,
-        role: "owner",
-    };
+  const user = await UserModel.create({
+    email: input.email.toLowerCase(), // normalisieren
+    passwordHash, // nur Hash speichern
+    orgId: input.orgId, // Mongoose castet string -> ObjectId
+    role: "owner",
+  });
 
-    userByemail.set(user.email, user);
-    userByid.set(user.id, user);
-
-    return user;
+  return {
+    id: user._id.toString(),
+    email: user.email,
+    passwordHash: user.passwordHash,
+    orgId: user.orgId.toString(),
+    role: user.role,
+  };
 }
 
-export function getUserById(id: string): User | undefined {
-    return userByid.get(id);
+export async function getUserById(id: string): Promise<User | undefined> {
+  const user = await UserModel.findById(id).exec();
+  if (!user) return undefined;
+
+  return {
+    id: user._id.toString(),
+    email: user.email,
+    passwordHash: user.passwordHash,
+    orgId: user.orgId.toString(),
+    role: user.role,
+  };
 }
 
-export function getuserByEmail(email: string): User | undefined {
-    return userByemail.get(email.toLowerCase());
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  const user = await UserModel.findOne({ email: email.toLowerCase() }).exec();
+  if (!user) return undefined;
+
+  return {
+    id: user._id.toString(),
+    email: user.email,
+    passwordHash: user.passwordHash,
+    orgId: user.orgId.toString(),
+    role: user.role,
+  };
 }
 
 export async function verifyPassword(user: User, password: string): Promise<boolean> {
-    return bcrypt.compare(password, user.passwordHash);
+  // compare: Klartext vs Hash -> true/false
+  return bcrypt.compare(password, user.passwordHash);
 }

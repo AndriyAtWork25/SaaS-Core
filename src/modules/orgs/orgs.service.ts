@@ -1,19 +1,19 @@
 // orgs.service.ts
-import crypto from "node:crypto";
+import { OrgModel } from "./models/org.model";
 
 export type Organization = {
     id: string;
     name: string;
 };
 
-const orgById = new Map<string, Organization>();
 
 export async function createOrganization(name: string): Promise<Organization> {
-   const org: Organization = {
-        id: crypto.randomUUID(),
-        name,
+   const org = await OrgModel.create({
+     name,
+     });
+        
+    return {
+        id: org._id.toString(),
+        name: org.name,
     };
-
-    orgById.set(org.id, org);
-    return org;
 }
