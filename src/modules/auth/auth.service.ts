@@ -44,6 +44,24 @@ export async function loginService(input: { email: string; password: string }) {
   return { accessToken, refreshToken };
 }
 
+export async function logoutService(input: { refreshToken: string }) {
+  const payload = verifyRefreshToken(input.refreshToken);
+  // verify prüft Signatur + expiry (wirft Error wenn ungültig)
+
+  const active = await isRefreshTokenActive(payload.jti, input.refreshToken);
+  // checkt DB + hash + expiresAt
+
+  if (!active) {
+    // Token ist sowieso schon revoked/abgelaufen -> Logout ist idempotent
+    // Wir geben trotzdem 204/200 zurück (kein Leak)
+    return;
+  }
+
+  await revokeRefreshToken(payload.jti);
+  // löscht diesen Refresh Token aus DB -> ab jetzt kein Refresh mehr möglich
+}
+
+
 export async function refreshService(input: { refreshToken: string }) {
   const payload = verifyRefreshToken(input.refreshToken);
 

@@ -16,3 +16,7 @@ export const refreshSchema = z.object({
   refreshToken: z.string().min(1),
   // Refresh Token muss mitgesendet werden (später Cookie)
 });
+
+export const logoutSchema = z.object({
+  refreshToken: z.string().min(1),
+});

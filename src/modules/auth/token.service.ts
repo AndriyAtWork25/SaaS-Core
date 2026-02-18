@@ -57,6 +57,8 @@ export async function isRefreshTokenActive(jti: string, refreshToken: string): P
   const doc = await RefreshTokenModel.findOne({ jti }).exec();
   if (!doc) return false;
 
+  if (doc.expiresAt.getTime() <= Date.now()) return false;
+
   // Hash vergleichen
   return doc.tokenHash === hashToken(refreshToken);
 }

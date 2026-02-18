@@ -1,7 +1,7 @@
 // auth.controller.ts
 // auth.controller.ts
 import type { Request, Response } from "express";
-import { loginService, refreshService, registerService } from "./auth.service";
+import { loginService, refreshService, registerService, logoutService } from "./auth.service";
 import { getUserById } from "../users/users.service"; // /auth/me lädt User aus DB
 
 export async function registerController(req: Request, res: Response) {
@@ -24,6 +24,17 @@ export async function refreshController(req: Request, res: Response) {
   const tokens = await refreshService({ refreshToken });
   res.status(200).json({ tokens });
 }
+
+export async function logoutController(req: Request, res: Response) {
+  const { refreshToken } = req.body;
+
+  await logoutService({ refreshToken });
+  // logout ist idempotent: egal ob Token schon weg ist -> kein Drama
+
+  res.status(204).send();
+  // 204 = Success ohne Body (clean)
+}
+
 
 // ✅ GET /auth/me (protected)
 export async function meController(req: Request, res: Response) {
