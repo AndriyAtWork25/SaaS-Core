@@ -4,7 +4,7 @@ import { env } from "./shared/config/env";
 import { errorHandler } from "./shared/middleware/errorHandler";
 import { authRouter } from "./modules/auth/auth.routes";
 import { helmetMiddleware, apiRateLimiter } from "./shared/middleware/security";
-
+import { orgsRouter } from "./modules/orgs/orgs.routes";
 
 export const app = express();
 
@@ -20,3 +20,5 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRouter);
 
 app.use(errorHandler);
+
+app.use("/orgs", orgsRouter);
