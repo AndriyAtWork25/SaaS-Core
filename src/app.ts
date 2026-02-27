@@ -5,6 +5,7 @@ import { errorHandler } from "./shared/middleware/errorHandler";
 import { authRouter } from "./modules/auth/auth.routes";
 import { helmetMiddleware, apiRateLimiter } from "./shared/middleware/security";
 import { orgsRouter } from "./modules/orgs/orgs.routes";
+import { orgMembersRouter } from "./modules/orgs/orgs.members.routes";
 
 export const app = express();
 
@@ -22,3 +23,5 @@ app.use("/auth", authRouter);
 app.use(errorHandler);
 
 app.use("/orgs", orgsRouter);
+
+app.use("/orgs", orgMembersRouter);

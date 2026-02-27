@@ -1,11 +1,16 @@
 // user.model.ts
-import  { Schema, model, Types } from "mongoose";
+// user.model.ts
+import { Schema, model, Types, Document } from "mongoose";
 
-export interface UserDocument {
-    email: string;
-    passwordHash: string;
-    orgId: Types.ObjectId;
-    role: "owner" | "admin" | "member" | "viewer";
+// Document = bringt _id automatisch mit
+export interface UserDocument extends Document {
+  email: string;
+  passwordHash: string;
+  orgId: Types.ObjectId;
+  role: "owner" | "admin" | "member" | "viewer";
+
+  createdAt: Date;   // ✅ von timestamps
+  updatedAt: Date;   // ✅ von timestamps
 }
 
 const userSchema = new Schema<UserDocument>(
