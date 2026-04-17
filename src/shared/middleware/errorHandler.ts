@@ -8,19 +8,23 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
 
     const statusCode = isAppError ? err.statusCode : 500;
     const message = isAppError ? err.message : "Internal Server Error";
-    
-    // In dev: echte Fehlermeldung loggen
+
+
     if (env.nodeEnv !== "test") {
-        // eslint-disable-next-line no-console
-        console.error(err);
+        console.error("[ERROR_HANDLER]", err);
     }
 
-    res.status(statusCode).json({
+    const debug =
+        env.nodeEnv === "development" && !isAppError
+            ? err instanceof Error
+                ? err.message
+                : String(err)
+            : undefined;
+
+    return res.status(statusCode).json({
         error: {
             message,
-            ...(env.nodeEnv === "development" && !isAppError
-                ? { debug: err instanceof Error ? err.message : String(err) }
-                : {}),
-            },
-          });   
-        }
+            ...(debug ? {debug} : {}),
+        },
+    });
+}
